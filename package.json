@@ -1,0 +1,33 @@
+{
+  "name": "exam-booker",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview --host 127.0.0.1",
+    "import:exams": "tsx scripts/import-exams.ts",
+    "test": "vitest run",
+    "format": "prettier --write src scripts tests vite.config.ts"
+  },
+  "dependencies": {
+    "docxtemplater": "^3.67.0",
+    "lucide-react": "^0.468.0",
+    "pizzip": "^3.2.0",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1"
+  },
+  "devDependencies": {
+    "@types/node": "^24.3.0",
+    "@types/react": "^19.1.10",
+    "@types/react-dom": "^19.1.9",
+    "@vitejs/plugin-react": "^5.0.0",
+    "exceljs": "^4.4.0",
+    "prettier": "^3.9.6",
+    "tsx": "^4.20.5",
+    "typescript": "^5.9.2",
+    "vite": "^7.1.3",
+    "vitest": "^3.2.4"
+  }
+}
