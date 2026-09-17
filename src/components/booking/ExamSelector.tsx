@@ -3,6 +3,7 @@ import { Search, ArrowUpRight, CalendarDays } from 'lucide-react';
 import { exams, matchesExam } from '../../lib/exams';
 import { formatDate } from '../../lib/dates';
 import { ExamBadges } from '../ExamSummary';
+import { windowLabel } from '../../lib/windows';
 export function ExamSelector({
   onSelect,
   onCalendar,
@@ -53,6 +54,12 @@ export function ExamSelector({
                 {exam.subject} <span className="muted">· {exam.unit}</span>
               </span>
               <strong>{exam.title}</strong>
+              {exam.session === 'Window' && (
+                <span className="result-meta">
+                  {exam.part ? `${exam.part} · ` : ''}
+                  {windowLabel(exam)}
+                </span>
+              )}
               <span className="result-meta">
                 {exam.examinationCode} · {formatDate(exam.date)} · {exam.duration} ·{' '}
                 {exam.examSeries}

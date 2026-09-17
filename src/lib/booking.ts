@@ -2,6 +2,15 @@ import { bookingFields, learnerFields } from '../config/fields';
 import { accessArrangements } from '../config/accessArrangements';
 import type { Booking, Exam, Learner } from '../types';
 import { localDate } from './dates';
+import { validDate } from './windows';
+export const selectExam = (booking: Booking, examId: string): Booking => ({
+  ...booking,
+  examId,
+  info: {
+    ...booking.info,
+    assessmentDate: examId === booking.examId ? (booking.info.assessmentDate ?? '') : '',
+  },
+});
 export const newBooking = (): Booking => ({
   examId: '',
   info: Object.fromEntries(
@@ -48,6 +57,17 @@ export function validateBooking(booking: Booking, exam?: Exam): ValidationError[
     if (field.required && !booking.info[field.key]?.trim())
       errors.push({ target: `booking-${field.key}`, message: `${field.label} is required.` });
   const { startTime, endTime } = booking.info;
+  if (exam?.session === 'Window') {
+    const date = booking.info.assessmentDate ?? '';
+    const message = !validDate(date)
+      ? 'Choose a valid booking date for this window.'
+      : !exam.windowStart || !exam.windowEnd
+        ? 'Confirm the missing window dates with the Exams Team before generating this booking.'
+        : date < exam.windowStart || date > exam.windowEnd
+          ? 'Booking date must fall within the published assessment window.'
+          : '';
+    if (message) errors.push({ target: 'booking-assessmentDate', message });
+  }
   for (const key of ['startTime', 'endTime'] as const) {
     if (booking.info[key] && !/^([01]\d|2[0-3]):[0-5]\d$/.test(booking.info[key]))
       errors.push({ target: `booking-${key}`, message: 'Enter a valid time in HH:MM format.' });

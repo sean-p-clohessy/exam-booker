@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import type { Booking } from '../types';
 import { exams } from '../lib/exams';
+import { formatDate } from '../lib/dates';
 import { bookingFields } from '../config/fields';
 import {
   arrangementText,
@@ -19,6 +20,7 @@ import {
   newBooking,
   newLearner,
   validateBooking,
+  selectExam,
 } from '../lib/booking';
 import { ExamSelector } from '../components/booking/ExamSelector';
 import { LearnerCard } from '../components/booking/LearnerCard';
@@ -50,6 +52,8 @@ export function BookingView({
     [documentDownload],
   );
   const exam = exams.find((e) => e.id === booking.examId);
+  const [dismissedWindow, setDismissedWindow] = useState('');
+  const showWindow = exam?.session === 'Window' && dismissedWindow !== exam.id;
   const errors = validateBooking(booking, exam);
   const arrangementCount = booking.learners.filter((l) => l.arrangements.length).length;
   const update = (patch: Partial<Booking>) => {
@@ -60,6 +64,7 @@ export function BookingView({
   };
   const clear = () => {
     setBooking(newBooking());
+    setDismissedWindow('');
     setShowErrors(false);
     setConfirmClear(false);
     setNotice('Booking cleared.');
@@ -125,7 +130,13 @@ export function BookingView({
                 <p>Assessment details come straight from the timetable.</p>
               </div>
               {exam && (
-                <button className="text-button push-right" onClick={() => update({ examId: '' })}>
+                <button
+                  className="text-button push-right"
+                  onClick={() => {
+                    update(selectExam(booking, ''));
+                    setDismissedWindow('');
+                  }}
+                >
                   Change exam
                 </button>
               )}
@@ -133,7 +144,10 @@ export function BookingView({
             {exam ? (
               <ExamSummary exam={exam} />
             ) : (
-              <ExamSelector onSelect={(id) => update({ examId: id })} onCalendar={onCalendar} />
+              <ExamSelector
+                onSelect={(id) => update(selectExam(booking, id))}
+                onCalendar={onCalendar}
+              />
             )}
           </section>
           <section className="panel">
@@ -146,6 +160,39 @@ export function BookingView({
                 </p>
               </div>
             </div>
+            {exam?.session === 'Window' && (
+              <div className="field booking-window-date">
+                <label htmlFor="booking-assessmentDate">
+                  Booking date <span className="required">*</span>
+                </label>
+                <input
+                  id="booking-assessmentDate"
+                  type="date"
+                  required
+                  min={exam.windowStart || undefined}
+                  max={exam.windowEnd || undefined}
+                  value={booking.info.assessmentDate ?? ''}
+                  onChange={(e) =>
+                    update({ info: { ...booking.info, assessmentDate: e.target.value } })
+                  }
+                  aria-describedby="booking-date-help booking-date-error"
+                  aria-invalid={
+                    !!(
+                      (showErrors || booking.info.assessmentDate) &&
+                      errors.some((e) => e.target === 'booking-assessmentDate')
+                    )
+                  }
+                />
+                <p id="booking-date-help" className="field-note">
+                  Select the day you want to book within the window shown above. Times refer to this
+                  day.
+                </p>
+                <p id="booking-date-error" className="field-error" role="status">
+                  {(showErrors || booking.info.assessmentDate) &&
+                    errors.find((e) => e.target === 'booking-assessmentDate')?.message}
+                </p>
+              </div>
+            )}
             <div className="form-grid">
               {bookingFields.map((field) => (
                 <FieldInput
@@ -336,6 +383,24 @@ export function BookingView({
           {exportError}
         </p>
       )}
+      {showWindow && exam && (
+        <Modal title="Check the assessment window" onClose={() => setDismissedWindow(exam.id)}>
+          <ExamSummary exam={exam} />
+          <div className="modal-actions">
+            <button
+              className="primary"
+              onClick={() => {
+                setDismissedWindow(exam.id);
+                requestAnimationFrame(() =>
+                  document.getElementById('booking-assessmentDate')?.focus(),
+                );
+              }}
+            >
+              Continue to booking <ArrowRight size={17} />
+            </button>
+          </div>
+        </Modal>
+      )}
       {confirmClear && (
         <Modal title="Clear this booking?" onClose={() => setConfirmClear(false)}>
           <p>
@@ -380,6 +445,12 @@ export function BookingView({
             {arrangementCount} with access arrangements
           </p>
           <dl className="review-info">
+            {exam.session === 'Window' && (
+              <div>
+                <dt>Booking date</dt>
+                <dd>{formatDate(booking.info.assessmentDate)}</dd>
+              </div>
+            )}
             {bookingFields
               .filter((f) => booking.info[f.key]?.trim())
               .map((f) => (

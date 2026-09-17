@@ -2,6 +2,7 @@ import { accessArrangements } from '../config/accessArrangements';
 import { arrangementText, validateBooking } from '../lib/booking';
 import { formatDate } from '../lib/dates';
 import type { Booking, Exam } from '../types';
+import { windowLabel } from '../lib/windows';
 const checkbox = (value: boolean) => (value ? '☒' : '☐');
 export function buildTemplateData(booking: Booking, exam: Exam) {
   const errors = validateBooking(booking, exam);
@@ -15,8 +16,8 @@ export function buildTemplateData(booking: Booking, exam: Exam) {
     exam: {
       ...exam,
       code: exam.examinationCode,
-      isoDate: exam.date,
-      date: formatDate(exam.date),
+      isoDate: exam.session === 'Window' ? info.assessmentDate : exam.date,
+      date: formatDate(exam.session === 'Window' ? info.assessmentDate : exam.date),
       eventLabel: exam.eventType === 'preRelease' ? 'Pre-release' : 'Exam',
     },
     examinationName: `${exam.subject} — ${exam.title}\n${exam.unit} · ${exam.examinationCode} · ${exam.qualification}\n${exam.examSeries} · ${exam.eventType === 'preRelease' ? 'Pre-release · ' : ''}${exam.session} · ${exam.duration}`,
@@ -24,7 +25,16 @@ export function buildTemplateData(booking: Booking, exam: Exam) {
     onlineCheckbox: checkbox(info.examType === 'Online'),
     startTime: info.startTime || `${exam.session} (time not specified)`,
     endTime: info.endTime || 'Not specified',
-    bookingNotes: [info.cohort ? `Course / cohort: ${info.cohort}` : '', info.notes]
+    bookingNotes: [
+      exam.session === 'Window'
+        ? `${exam.eventType === 'preRelease' ? 'Preparation' : 'Assessment'} window${exam.part ? ` · ${exam.part}` : ''}: ${windowLabel(exam)}`
+        : '',
+      exam.session === 'Window' && exam.submissionDeadline
+        ? `Submission deadline: ${formatDate(exam.submissionDeadline)}`
+        : '',
+      info.cohort ? `Course / cohort: ${info.cohort}` : '',
+      info.notes,
+    ]
       .filter(Boolean)
       .join('\n'),
     learnerCount: booking.learners.length,
@@ -54,5 +64,5 @@ export function buildTemplateData(booking: Booking, exam: Exam) {
     })),
   };
 }
-export const bookingFilename = (exam: Exam) =>
-  `Exam_Booking_${exam.examinationCode.replace(/[^a-zA-Z0-9_-]/g, '_')}_${exam.date}.docx`;
+export const bookingFilename = (exam: Exam, assessmentDate?: string) =>
+  `Exam_Booking_${exam.examinationCode.replace(/[^a-zA-Z0-9_-]/g, '_')}_${exam.session === 'Window' && assessmentDate ? assessmentDate : exam.date}.docx`;

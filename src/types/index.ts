@@ -10,6 +10,14 @@ export interface Exam {
   session: 'Morning' | 'Afternoon' | 'Window';
   duration: string;
   eventType: 'exam' | 'preRelease';
+  windowStart?: string;
+  windowEnd?: string;
+  releaseDate?: string;
+  submissionDeadline?: string;
+  part?: string;
+  language?: string;
+  windowNotes?: string;
+  windowSource?: string;
 }
 
 export interface Learner {

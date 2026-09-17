@@ -1,4 +1,5 @@
 import { TimetableFilters } from '../components/calendar/TimetableFilters';
+import { windowLabel } from '../lib/windows';
 import { useState } from 'react';
 import { ArrowRight, CalendarDays, ChevronLeft, ChevronRight, List, Search } from 'lucide-react';
 import type { Exam } from '../types';
@@ -28,6 +29,12 @@ export function EventRow({ exam, onClick }: { exam: Exam; onClick: () => void })
           {exam.subject} · {exam.unit}
         </span>
         <strong>{exam.title}</strong>
+        {exam.session === 'Window' && (
+          <span className="muted">
+            {exam.part ? `${exam.part} · ` : ''}
+            {windowLabel(exam)}
+          </span>
+        )}
         <span className="muted">
           {exam.examinationCode} · {exam.duration} · {exam.examSeries}
         </span>

@@ -33,12 +33,6 @@ export function EventDetails({
           This is a pre-release event. Its date is the release date shown in the timetable.
         </p>
       )}
-      {exam.session === 'Window' && (
-        <p className="window-note">
-          This is a window event. Only the supplied timetable date is shown; no end date or exact
-          start time is specified.
-        </p>
-      )}
       <div className="modal-actions">
         <button onClick={onClose}>Close</button>
         <button className="primary" onClick={() => onBook(exam.id)}>

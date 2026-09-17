@@ -10,7 +10,8 @@
     "import:exams": "tsx scripts/import-exams.ts",
     "test": "vitest run",
     "format": "prettier --write src scripts tests vite.config.ts",
-    "prepare:pearson": "tsx scripts/prepare-pearson.ts"
+    "prepare:pearson": "tsx scripts/prepare-pearson.ts",
+    "sync:windows": "tsx scripts/sync-windows.ts"
   },
   "dependencies": {
     "docxtemplater": "^3.67.0",

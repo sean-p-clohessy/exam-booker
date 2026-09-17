@@ -1,6 +1,7 @@
 import { CalendarDays, Clock3, Hash } from 'lucide-react';
 import type { Exam } from '../types';
 import { formatDate } from '../lib/dates';
+import { ExamWindow } from './ExamWindow';
 export function ExamBadges({ exam }: { exam: Exam }) {
   return (
     <span className="badges">
@@ -20,6 +21,7 @@ export function ExamSummary({ exam }: { exam: Exam }) {
       <div className="exam-meta">
         <span>
           <CalendarDays size={16} />
+          {exam.session === 'Window' ? 'Timetable date: ' : ''}
           {formatDate(exam.date)}
         </span>
         <span>
@@ -35,6 +37,7 @@ export function ExamSummary({ exam }: { exam: Exam }) {
         <ExamBadges exam={exam} />
         <span className="mono muted">{exam.examSeries}</span>
       </div>
+      <ExamWindow exam={exam} />
     </div>
   );
 }

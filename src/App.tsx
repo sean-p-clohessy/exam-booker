@@ -3,7 +3,7 @@ import { CalendarDays, FilePenLine, LockKeyhole } from 'lucide-react';
 import { BookingView } from './views/BookingView';
 import { UpcomingView } from './views/UpcomingView';
 import { CalendarView } from './views/CalendarView';
-import { newBooking } from './lib/booking';
+import { newBooking, selectExam } from './lib/booking';
 import { academicYear } from './lib/exams';
 export default function App() {
   const [view, setView] = useState<'booking' | 'calendar' | 'upcoming'>('booking');
@@ -71,7 +71,7 @@ export default function App() {
         ) : (
           <TimetableView
             onBook={(examId) => {
-              setBooking({ ...booking, examId });
+              setBooking(selectExam(booking, examId));
               setView('booking');
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
