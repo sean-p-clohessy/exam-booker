@@ -1,3 +1,5 @@
+import { BookingSessions } from '../components/booking/BookingSessions';
+import { bookingSessions, sessionSchedule } from '../lib/sessions';
 import { useEffect, useState } from 'react';
 import {
   ArrowRight,
@@ -12,7 +14,6 @@ import {
 } from 'lucide-react';
 import type { Booking } from '../types';
 import { exams } from '../lib/exams';
-import { formatDate } from '../lib/dates';
 import { bookingFields } from '../config/fields';
 import {
   arrangementText,
@@ -161,53 +162,34 @@ export function BookingView({
               </div>
             </div>
             {exam?.session === 'Window' && (
-              <div className="field booking-window-date">
-                <label htmlFor="booking-assessmentDate">
-                  Booking date <span className="required">*</span>
-                </label>
-                <input
-                  id="booking-assessmentDate"
-                  type="date"
-                  required
-                  min={exam.windowStart || undefined}
-                  max={exam.windowEnd || undefined}
-                  value={booking.info.assessmentDate ?? ''}
-                  onChange={(e) =>
-                    update({ info: { ...booking.info, assessmentDate: e.target.value } })
-                  }
-                  aria-describedby="booking-date-help booking-date-error"
-                  aria-invalid={
-                    !!(
-                      (showErrors || booking.info.assessmentDate) &&
-                      errors.some((e) => e.target === 'booking-assessmentDate')
-                    )
-                  }
-                />
-                <p id="booking-date-help" className="field-note">
-                  Select the day you want to book within the window shown above. Times refer to this
-                  day.
-                </p>
-                <p id="booking-date-error" className="field-error" role="status">
-                  {(showErrors || booking.info.assessmentDate) &&
-                    errors.find((e) => e.target === 'booking-assessmentDate')?.message}
-                </p>
-              </div>
+              <BookingSessions
+                sessions={bookingSessions(booking)}
+                exam={exam}
+                onChange={(sessions) => update({ sessions })}
+                errors={errors}
+                showErrors={showErrors}
+              />
             )}
             <div className="form-grid">
-              {bookingFields.map((field) => (
-                <FieldInput
-                  key={field.key}
-                  field={field}
-                  id={`booking-${field.key}`}
-                  value={booking.info[field.key] ?? ''}
-                  onChange={(value) => update({ info: { ...booking.info, [field.key]: value } })}
-                  error={
-                    showErrors || field.type === 'time'
-                      ? errors.find((e) => e.target === `booking-${field.key}`)?.message
-                      : undefined
-                  }
-                />
-              ))}
+              {bookingFields
+                .filter(
+                  (field) =>
+                    exam?.session !== 'Window' || !['startTime', 'endTime'].includes(field.key),
+                )
+                .map((field) => (
+                  <FieldInput
+                    key={field.key}
+                    field={field}
+                    id={`booking-${field.key}`}
+                    value={booking.info[field.key] ?? ''}
+                    onChange={(value) => update({ info: { ...booking.info, [field.key]: value } })}
+                    error={
+                      showErrors || field.type === 'time'
+                        ? errors.find((e) => e.target === `booking-${field.key}`)?.message
+                        : undefined
+                    }
+                  />
+                ))}
             </div>
             <p className="field-note">
               The signature and “Exams Use” sections remain available for completion in Word.
@@ -392,7 +374,9 @@ export function BookingView({
               onClick={() => {
                 setDismissedWindow(exam.id);
                 requestAnimationFrame(() =>
-                  document.getElementById('booking-assessmentDate')?.focus(),
+                  document
+                    .getElementById(`session-${bookingSessions(booking)[0]?.id}-date`)
+                    ?.focus(),
                 );
               }}
             >
@@ -447,12 +431,16 @@ export function BookingView({
           <dl className="review-info">
             {exam.session === 'Window' && (
               <div>
-                <dt>Booking date</dt>
-                <dd>{formatDate(booking.info.assessmentDate)}</dd>
+                <dt>Booking sessions</dt>
+                <dd>{sessionSchedule(bookingSessions(booking))}</dd>
               </div>
             )}
             {bookingFields
-              .filter((f) => booking.info[f.key]?.trim())
+              .filter(
+                (f) =>
+                  booking.info[f.key]?.trim() &&
+                  (exam.session !== 'Window' || !['startTime', 'endTime'].includes(f.key)),
+              )
               .map((f) => (
                 <div key={f.key}>
                   <dt>{f.label}</dt>

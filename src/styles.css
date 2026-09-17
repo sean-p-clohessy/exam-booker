@@ -1869,3 +1869,31 @@ footer {
 .booking-window-date input {
   color-scheme: dark;
 }
+.booking-sessions {
+  margin-bottom: 24px;
+}
+.session-row {
+  border: 1px solid #33465e;
+  border-radius: 8px;
+  padding: 16px;
+  margin: 16px 0;
+}
+.session-row legend {
+  padding: 0 8px;
+  color: #83def0;
+}
+.session-row .form-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.session-row input {
+  min-width: 0;
+  color-scheme: dark;
+}
+.review-info dd {
+  white-space: pre-line;
+}
+@media (max-width: 550px) {
+  .session-row .form-grid {
+    grid-template-columns: 1fr;
+  }
+}

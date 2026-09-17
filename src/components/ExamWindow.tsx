@@ -13,7 +13,7 @@ export function ExamWindow({ exam }: { exam: Exam }) {
       <strong className="window-range">{windowLabel(exam)}</strong>
       <p>
         {exam.windowStart && exam.windowEnd
-          ? 'Choose a booking date within these dates, including the first and last day.'
+          ? 'Choose session dates within these dates, including the first and last day.'
           : 'Check the permitted dates with the Exams Team before booking. No window has been assumed.'}{' '}
         The assessment duration is {exam.duration}; it is not the length of the window.
       </p>

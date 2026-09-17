@@ -1,3 +1,4 @@
+import { bookingSessions, sessionSchedule, totalMinutes, durationLabel } from '../lib/sessions';
 import { accessArrangements } from '../config/accessArrangements';
 import { arrangementText, validateBooking } from '../lib/booking';
 import { formatDate } from '../lib/dates';
@@ -10,22 +11,37 @@ export function buildTemplateData(booking: Booking, exam: Exam) {
   const info = Object.fromEntries(
     Object.entries(booking.info).map(([key, value]) => [key, value.trim()]),
   );
+  const sessions = exam.session === 'Window' && booking.sessions ? bookingSessions(booking) : null;
+  const dates = sessions ? [...new Set(sessions.map((s) => s.date))].sort() : [];
   return {
     ...info,
     requestDate: info.requestDate ? formatDate(info.requestDate) : '',
     exam: {
       ...exam,
       code: exam.examinationCode,
-      isoDate: exam.session === 'Window' ? info.assessmentDate : exam.date,
-      date: formatDate(exam.session === 'Window' ? info.assessmentDate : exam.date),
+      isoDate: dates[0] || (exam.session === 'Window' ? info.assessmentDate : exam.date),
+      date: dates.length
+        ? dates.map((date) => formatDate(date)).join('; ')
+        : formatDate(exam.session === 'Window' ? info.assessmentDate : exam.date),
       eventLabel: exam.eventType === 'preRelease' ? 'Pre-release' : 'Exam',
     },
     examinationName: `${exam.subject} — ${exam.title}\n${exam.unit} · ${exam.examinationCode} · ${exam.qualification}\n${exam.examSeries} · ${exam.eventType === 'preRelease' ? 'Pre-release · ' : ''}${exam.session} · ${exam.duration}`,
     writtenCheckbox: checkbox(info.examType === 'Written'),
     onlineCheckbox: checkbox(info.examType === 'Online'),
-    startTime: info.startTime || `${exam.session} (time not specified)`,
-    endTime: info.endTime || 'Not specified',
+    startTime: sessions
+      ? sessions.length === 1
+        ? sessions[0].startTime
+        : 'See session schedule in notes'
+      : info.startTime || `${exam.session} (time not specified)`,
+    endTime: sessions
+      ? sessions.length === 1
+        ? sessions[0].endTime
+        : 'See session schedule in notes'
+      : info.endTime || 'Not specified',
     bookingNotes: [
+      sessions
+        ? `ONE BOOKING — SESSION SCHEDULE\n${sessionSchedule(sessions)}\nCombined time: ${durationLabel(totalMinutes(sessions)!)}. Session numbers are local scheduling labels, not Pearson part labels.`
+        : '',
       exam.session === 'Window'
         ? `${exam.eventType === 'preRelease' ? 'Preparation' : 'Assessment'} window${exam.part ? ` · ${exam.part}` : ''}: ${windowLabel(exam)}`
         : '',

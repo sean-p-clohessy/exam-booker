@@ -35,7 +35,10 @@ export async function generateBookingDocument(booking: Booking, exam: Exam) {
   );
   const link = document.createElement('a');
   link.href = url;
-  const filename = bookingFilename(exam, booking.info.assessmentDate);
+  const filename = bookingFilename(
+    exam,
+    booking.sessions?.map((s) => s.date).sort()[0] || booking.info.assessmentDate,
+  );
   link.download = filename;
   // Keep the download link in the active modal's interactive subtree.
   // Content outside a showModal() dialog is inert in the browser.

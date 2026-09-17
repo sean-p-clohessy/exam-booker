@@ -34,7 +34,14 @@ export interface Learner {
   ready: string;
 }
 export type BookingInfo = Record<string, string>;
+export interface BookingSession {
+  id: string;
+  date: string;
+  startTime: string;
+  endTime: string;
+}
 export interface Booking {
+  sessions?: BookingSession[];
   examId: string;
   info: BookingInfo;
   learners: Learner[];
