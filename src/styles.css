@@ -1850,6 +1850,22 @@ footer {
   margin-bottom: 24px;
   max-width: 520px;
 }
+.on-demand-filter {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: fit-content;
+  margin-top: 16px;
+  color: #b7c8dc;
+  font-size: 13px;
+  cursor: pointer;
+}
+.on-demand-filter input {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: var(--pink);
+}
 .booking-window-date input {
   color-scheme: dark;
 }

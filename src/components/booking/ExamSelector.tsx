@@ -13,7 +13,14 @@ export function ExamSelector({
 }) {
   const [query, setQuery] = useState('');
   const [subject, setSubject] = useState('');
-  const matches = exams.filter((e) => matchesExam(e, query) && (!subject || e.subject === subject));
+  const [onDemandOnly, setOnDemandOnly] = useState(false);
+  const hasOnDemand = exams.some((exam) => exam.onDemand === true);
+  const matches = exams.filter(
+    (e) =>
+      matchesExam(e, query) &&
+      (!subject || e.subject === subject) &&
+      (!onDemandOnly || e.onDemand === true),
+  );
   return (
     <div>
       <div className="selector-tools">
@@ -40,6 +47,14 @@ export function ExamSelector({
           ))}
         </select>
       </div>
+      <label className="on-demand-filter">
+        <input
+          type="checkbox"
+          checked={onDemandOnly}
+          onChange={(event) => setOnDemandOnly(event.target.checked)}
+        />
+        On-demand exams only
+      </label>
       <div className="results-caption">
         <span aria-live="polite">{matches.length} matching events</span>
         <button className="text-button" onClick={onCalendar}>
@@ -74,15 +89,24 @@ export function ExamSelector({
         {!matches.length && (
           <div className="empty-state">
             <Search />
-            <h3>No exams match your search</h3>
-            <p>Try a shorter title, a code, or another subject.</p>
+            <h3>
+              {onDemandOnly && !hasOnDemand
+                ? 'No on-demand exams added yet'
+                : 'No exams match your search'}
+            </h3>
+            <p>
+              {onDemandOnly && !hasOnDemand
+                ? 'On-demand exams will appear here once the Exams Team supplies them. Untick the box to browse the current timetable.'
+                : 'Try a shorter title, a code, or another subject.'}
+            </p>
             <button
               onClick={() => {
                 setQuery('');
                 setSubject('');
+                setOnDemandOnly(false);
               }}
             >
-              Clear search
+              Clear filters
             </button>
           </div>
         )}

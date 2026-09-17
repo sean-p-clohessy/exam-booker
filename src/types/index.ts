@@ -10,6 +10,7 @@ export interface Exam {
   session: 'Morning' | 'Afternoon' | 'Window';
   duration: string;
   eventType: 'exam' | 'preRelease';
+  onDemand?: boolean;
   windowStart?: string;
   windowEnd?: string;
   releaseDate?: string;
