@@ -1745,3 +1745,58 @@ footer {
     transition: none !important;
   }
 }
+/* Timetable navigation: filters remain beside the calendar on wide screens. */
+.calendar-layout {
+  grid-template-columns: 250px minmax(0, 1fr);
+  align-items: start;
+}
+.calendar-layout .calendar-filters {
+  margin: 0;
+  padding: 20px;
+  position: sticky;
+  top: 20px;
+}
+.calendar-layout .filter-top {
+  flex-wrap: wrap;
+  gap: 16px;
+}
+.calendar-layout .filter-top > .search-field {
+  flex: 1 1 100%;
+  min-width: 0;
+}
+.calendar-layout .filter-top .search-field input {
+  min-width: 0;
+}
+.calendar-layout .filter-grid {
+  grid-template-columns: 1fr;
+  margin-top: 20px;
+}
+.calendar-layout .filter-label {
+  margin-right: auto;
+}
+.nav-bar nav button:nth-child(2).active:after {
+  background: var(--cyan);
+}
+.nav-bar nav button:nth-child(3).active:after {
+  background: var(--green);
+}
+@media (max-width: 1000px) {
+  .calendar-layout {
+    grid-template-columns: 1fr;
+  }
+  .calendar-layout .calendar-filters {
+    position: static;
+  }
+  .calendar-layout .filter-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 550px) {
+  .nav-bar nav button {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+  .calendar-layout .calendar-filters {
+    padding: 16px;
+  }
+}

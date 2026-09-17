@@ -1,14 +1,6 @@
+import { TimetableFilters } from '../components/calendar/TimetableFilters';
 import { useState } from 'react';
-import {
-  ArrowRight,
-  CalendarDays,
-  ChevronLeft,
-  ChevronRight,
-  List,
-  Search,
-  SlidersHorizontal,
-  X,
-} from 'lucide-react';
+import { ArrowRight, CalendarDays, ChevronLeft, ChevronRight, List, Search } from 'lucide-react';
 import type { Exam } from '../types';
 import {
   academicYear,
@@ -23,14 +15,8 @@ import { MonthGrid } from '../components/calendar/MonthGrid';
 import { EventDetails } from '../components/calendar/EventDetails';
 import { Modal } from '../components/Modal';
 import { ExamBadges } from '../components/ExamSummary';
-const filterLabels = {
-  subject: 'Subject',
-  examSeries: 'Exam series',
-  qualification: 'Qualification',
-  session: 'Session',
-};
 
-function EventRow({ exam, onClick }: { exam: Exam; onClick: () => void }) {
+export function EventRow({ exam, onClick }: { exam: Exam; onClick: () => void }) {
   return (
     <button className="list-event" onClick={onClick}>
       <span className="date-tile">
@@ -64,7 +50,6 @@ export function CalendarView({ onBook }: { onBook: (id: string) => void }) {
   const upcoming = upcomingExams(filtered, today);
   const inMonth = filtered.filter((e) => e.date.startsWith(month));
   const months = [...new Set(filtered.map((e) => e.date.slice(0, 7)))];
-  const anyFilter = Object.values(filters).some(Boolean);
   return (
     <>
       <div className="page-heading">
@@ -80,59 +65,8 @@ export function CalendarView({ onBook }: { onBook: (id: string) => void }) {
           {academicYear}
         </span>
       </div>
-      <section className="panel calendar-filters" aria-label="Filter timetable">
-        <div className="filter-top">
-          <div className="search-field">
-            <label htmlFor="calendar-search" className="sr-only">
-              Search timetable
-            </label>
-            <Search size={19} />
-            <input
-              id="calendar-search"
-              value={filters.query}
-              onChange={(e) => setFilters({ ...filters, query: e.target.value })}
-              placeholder="Search title, subject, code or unit…"
-            />
-          </div>
-          <span className="filter-label">
-            <SlidersHorizontal size={17} /> Filters
-          </span>
-          <button
-            className="text-button"
-            onClick={() => setFilters({ ...emptyFilters })}
-            disabled={!anyFilter}
-          >
-            <X size={15} /> Clear filters
-          </button>
-        </div>
-        <div className="filter-grid">
-          {(Object.keys(filterLabels) as Array<keyof typeof filterLabels>).map((key) => (
-            <div className="field" key={key}>
-              <label htmlFor={`filter-${key}`}>{filterLabels[key]}</label>
-              <select
-                id={`filter-${key}`}
-                value={filters[key]}
-                onChange={(e) => setFilters({ ...filters, [key]: e.target.value })}
-              >
-                <option value="">
-                  All {filterLabels[key].toLowerCase()}
-                  {key === 'subject'
-                    ? 's'
-                    : key === 'qualification'
-                      ? 's'
-                      : key === 'session'
-                        ? 's'
-                        : ''}
-                </option>
-                {[...new Set(exams.map((e) => e[key]))].sort().map((value) => (
-                  <option key={value}>{value}</option>
-                ))}
-              </select>
-            </div>
-          ))}
-        </div>
-      </section>
       <div className="calendar-layout">
+        <TimetableFilters filters={filters} setFilters={setFilters} />
         <section className="panel calendar-panel">
           <div className="calendar-toolbar">
             <div className="month-navigation">
@@ -248,47 +182,6 @@ export function CalendarView({ onBook }: { onBook: (id: string) => void }) {
             <small>Dates from the timetable. No exact times implied.</small>
           </div>
         </section>
-        <aside className="upcoming-sidebar">
-          <div className="panel upcoming-panel">
-            <div className="eyebrow green-text">Coming up</div>
-            <h2>Next on the timetable</h2>
-            <p className="muted upcoming-caption">
-              From {formatDate(today, { day: 'numeric', month: 'short', year: 'numeric' })}
-              {anyFilter ? ' · Filters applied' : ''}
-            </p>
-            {upcoming.length ? (
-              upcoming.map((e) => (
-                <button className="upcoming-event" key={e.id} onClick={() => setSelected(e)}>
-                  <span className="upcoming-date">
-                    {formatDate(e.date, { day: 'numeric', month: 'short' })}
-                    <ArrowRight size={14} />
-                  </span>
-                  <strong>{e.subject}</strong>
-                  <span>{e.title}</span>
-                  <span className="muted">
-                    {e.unit} · {e.examinationCode}
-                  </span>
-                  <ExamBadges exam={e} />
-                </button>
-              ))
-            ) : (
-              <div className="empty-upcoming">
-                <CalendarDays size={24} />
-                <p>
-                  No upcoming events
-                  {anyFilter ? ' match these filters' : ' in the loaded timetable'}.
-                </p>
-              </div>
-            )}
-          </div>
-          <div className="sidebar-note">
-            <CalendarDays size={21} />
-            <p>
-              <strong>Find it. Book it.</strong>Open any assessment to see its full details and book
-              that exact event.
-            </p>
-          </div>
-        </aside>
       </div>
       {day && !selected && (
         <Modal title={formatDate(day)} onClose={() => setDay('')} wide>

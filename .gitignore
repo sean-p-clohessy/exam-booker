@@ -3,3 +3,5 @@ dist/
 .qa/
 *.tsbuildinfo
 .pnpm-store/
+
+review/

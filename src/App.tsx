@@ -1,12 +1,14 @@
 import { useState } from 'react';
 import { CalendarDays, FilePenLine, LockKeyhole } from 'lucide-react';
 import { BookingView } from './views/BookingView';
+import { UpcomingView } from './views/UpcomingView';
 import { CalendarView } from './views/CalendarView';
 import { newBooking } from './lib/booking';
 import { academicYear } from './lib/exams';
 export default function App() {
-  const [view, setView] = useState<'booking' | 'calendar'>('booking');
+  const [view, setView] = useState<'booking' | 'calendar' | 'upcoming'>('booking');
   const [booking, setBooking] = useState(newBooking);
+  const TimetableView = view === 'upcoming' ? UpcomingView : CalendarView;
   return (
     <>
       <a className="skip-link" href="#main">
@@ -47,6 +49,13 @@ export default function App() {
           >
             <CalendarDays size={17} /> Calendar
           </button>
+          <button
+            aria-current={view === 'upcoming' ? 'page' : undefined}
+            className={view === 'upcoming' ? 'active' : ''}
+            onClick={() => setView('upcoming')}
+          >
+            <CalendarDays size={17} /> Coming up
+          </button>
         </nav>
         <span className="nav-note">
           BTEC EXAMINATIONS <span>/</span> {academicYear}
@@ -60,7 +69,7 @@ export default function App() {
             onCalendar={() => setView('calendar')}
           />
         ) : (
-          <CalendarView
+          <TimetableView
             onBook={(examId) => {
               setBooking({ ...booking, examId });
               setView('booking');

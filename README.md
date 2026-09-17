@@ -145,3 +145,13 @@ Visual Word pagination should be checked after template changes, particularly wi
 Current verification: all 88 records and all nine source columns independently match the workbook. The 12 tests, TypeScript check and production build pass. Browser checks covered calendar-to-booking selection, filters, busy-day expansion, learner ordering, conditional arrangements, clear confirmation, refresh clearing, desktop/mobile layouts, and loading the built site under `/exam-booker/`.
 
 **Remaining verification limitation:** visual DOCX pagination has not been confirmed. The bundled LibreOffice renderer is unavailable in this environment and local Word automation did not complete its PDF conversion. The supplied College form is already integrated; there is no missing-template dependency. The in-app browser also does not expose a completed-download event, so browser verification confirms successful generation and the explicit download link rather than a file saved to the user's Downloads folder.
+
+## Pearson timetable preparation (provisional)
+
+Run `pnpm prepare:pearson` to download the Winter and Summer 2027 final BTEC timetables and create `review/pearson-2027/review.xlsx`. For offline copies: `pnpm prepare:pearson path/to/winter.xlsx path/to/summer.xlsx` (winter first).
+
+`config/pearson-selection.json` holds qualification/code pairs inferred from the staff-curated timetable. The Exams Team should confirm this list, including Welsh variants and newly offered courses. The script selects from **All papers** only, keeps parts, language, release dates, windows, deadlines and notes, and flags new/changed rows and repeats. Other papers and unmatched college codes have separate sheets. Dates outside August 2026–July 2027 are flagged, not silently removed.
+
+The generated workbook is a local review artifact and does not change the website. After review, copy the approved first nine columns into a separate workbook's `Sheet3`, then run `pnpm import:exams path/to/approved.xlsx`, test, build and publish. Resolve windows using Pearson's full notes; the calendar currently displays event dates rather than continuous windows. Future academic years require updating the source URLs and selection dates in the script/config.
+
+Verified against both Pearson 2027 files: 88 selected source rows, no unmatched college codes. The current published 88-event dataset remains unchanged pending confirmation. All 20 regression tests and the production build pass.

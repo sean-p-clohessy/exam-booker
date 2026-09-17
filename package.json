@@ -9,7 +9,8 @@
     "preview": "vite preview --host 127.0.0.1",
     "import:exams": "tsx scripts/import-exams.ts",
     "test": "vitest run",
-    "format": "prettier --write src scripts tests vite.config.ts"
+    "format": "prettier --write src scripts tests vite.config.ts",
+    "prepare:pearson": "tsx scripts/prepare-pearson.ts"
   },
   "dependencies": {
     "docxtemplater": "^3.67.0",
