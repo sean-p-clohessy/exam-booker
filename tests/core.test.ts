@@ -105,6 +105,38 @@ describe('calendar', () => {
   });
 });
 describe('booking validation and template mapping', () => {
+  it.each(['09:00', '14:00'])(
+    'blocks an end time of %s for a 14:00 start, including export',
+    (endTime) => {
+      const booking = validBooking();
+      Object.assign(booking.info, { startTime: '14:00', endTime });
+      expect(validateBooking(booking, exam)).toContainEqual({
+        target: 'booking-endTime',
+        message: 'End time must be after the start time on the exam date.',
+      });
+      expect(() => buildTemplateData(booking, exam)).toThrow('End time must be after');
+    },
+  );
+  it.each([
+    ['14:00', '14:01'],
+    ['09:00', '14:00'],
+    ['', ''],
+    ['14:00', ''],
+    ['', '16:00'],
+  ])('allows valid or optional times (%s, %s)', (startTime, endTime) => {
+    const booking = validBooking();
+    Object.assign(booking.info, { startTime, endTime });
+    expect(validateBooking(booking, exam)).toEqual([]);
+  });
+  it('revalidates when the start changes and rejects malformed times', () => {
+    const booking = validBooking();
+    Object.assign(booking.info, { startTime: '09:00', endTime: '14:00' });
+    expect(validateBooking(booking, exam)).toEqual([]);
+    booking.info.startTime = '15:00';
+    expect(validateBooking(booking, exam)[0].target).toBe('booking-endTime');
+    booking.info.startTime = '25:00';
+    expect(validateBooking(booking, exam)[0].target).toBe('booking-startTime');
+  });
   it('rejects missing exam, requester, learners and partially empty learners', () => {
     expect(validateBooking(newBooking()).map((e) => e.target)).toEqual([
       'exam-search',

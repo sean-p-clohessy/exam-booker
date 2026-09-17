@@ -47,6 +47,22 @@ export function validateBooking(booking: Booking, exam?: Exam): ValidationError[
   for (const field of bookingFields)
     if (field.required && !booking.info[field.key]?.trim())
       errors.push({ target: `booking-${field.key}`, message: `${field.label} is required.` });
+  const { startTime, endTime } = booking.info;
+  for (const key of ['startTime', 'endTime'] as const) {
+    if (booking.info[key] && !/^([01]\d|2[0-3]):[0-5]\d$/.test(booking.info[key]))
+      errors.push({ target: `booking-${key}`, message: 'Enter a valid time in HH:MM format.' });
+  }
+  // Both optional clock times refer to the selected exam date, not an overnight range.
+  if (
+    startTime &&
+    endTime &&
+    !errors.some((e) => ['booking-startTime', 'booking-endTime'].includes(e.target)) &&
+    endTime <= startTime
+  )
+    errors.push({
+      target: 'booking-endTime',
+      message: 'End time must be after the start time on the exam date.',
+    });
   if (!booking.learners.length)
     errors.push({ target: 'add-learner', message: 'Add at least one learner.' });
   booking.learners.forEach((learner, index) => {

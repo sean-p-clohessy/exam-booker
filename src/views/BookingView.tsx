@@ -155,7 +155,7 @@ export function BookingView({
                   value={booking.info[field.key] ?? ''}
                   onChange={(value) => update({ info: { ...booking.info, [field.key]: value } })}
                   error={
-                    showErrors
+                    showErrors || field.type === 'time'
                       ? errors.find((e) => e.target === `booking-${field.key}`)?.message
                       : undefined
                   }
