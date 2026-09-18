@@ -91,6 +91,12 @@ export function LearnerCard({
           <legend>
             Access arrangements <span className="muted">Select all that apply</span>
           </legend>
+          <p className="field-note">
+            Record arrangements agreed with the Exams / Learning Support team. Selecting an option
+            does not approve it. Use learner notes for the required format, equipment or room
+            details. A smaller shared room (sometimes called a quiet room) is not individual
+            invigilation. Coloured overlays and coloured question papers are different arrangements.
+          </p>
           <div className="checkbox-grid">
             {accessArrangements.map((a) => (
               <label
