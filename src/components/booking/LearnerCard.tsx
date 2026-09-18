@@ -23,9 +23,12 @@ export function LearnerCard({
   errors: ValidationError[];
 }) {
   const [expanded, setExpanded] = useState(true);
+  const [arrangementsExpanded, setArrangementsExpanded] = useState(false);
   const [customTime, setCustomTime] = useState(!['25', '50'].includes(learner.extraTime));
   const error = (key: string) => errors.find((e) => e.target === `${learner.id}-${key}`)?.message;
   const patch = (values: Partial<Learner>) => onChange({ ...learner, ...values });
+  const arrangementsOpen =
+    arrangementsExpanded || !!error('extraTime') || !!error('otherArrangement');
   return (
     <article className="learner-card">
       <div className="learner-head">
@@ -89,75 +92,88 @@ export function LearnerCard({
         </div>
         <fieldset className="arrangements">
           <legend>
-            Access arrangements <span className="muted">Select all that apply</span>
+            <button
+              type="button"
+              className="arrangements-toggle"
+              aria-expanded={arrangementsOpen}
+              aria-controls={`${learner.id}-arrangements`}
+              onClick={() => setArrangementsExpanded(!arrangementsOpen)}
+            >
+              Access arrangements
+              <span className="muted">{learner.arrangements.length} selected</span>
+              <ChevronDown size={16} className={arrangementsOpen ? 'rotated' : ''} />
+            </button>
           </legend>
-          <p className="field-note">
-            Record arrangements agreed with the Exams / Learning Support team. Selecting an option
-            does not approve it. Use learner notes for the required format, equipment or room
-            details. A smaller shared room (sometimes called a quiet room) is not individual
-            invigilation. Coloured overlays and coloured question papers are different arrangements.
-          </p>
-          <div className="checkbox-grid">
-            {accessArrangements.map((a) => (
-              <label
-                key={a.id}
-                className={`check-option ${learner.arrangements.includes(a.id) ? 'checked' : ''}`}
-              >
-                <input
-                  type="checkbox"
-                  checked={learner.arrangements.includes(a.id)}
-                  onChange={(e) =>
-                    patch({
-                      arrangements: e.target.checked
-                        ? [...learner.arrangements, a.id]
-                        : learner.arrangements.filter((id) => id !== a.id),
-                    })
-                  }
-                />
-                <span>{a.label}</span>
-              </label>
-            ))}
-          </div>
-          <div className="form-grid conditional-fields">
-            {learner.arrangements.includes('extraTime') && (
-              <>
-                <div className="field">
-                  <label htmlFor={`${learner.id}-extraTime-choice`}>Extra time percentage</label>
-                  <select
-                    id={`${learner.id}-extraTime-choice`}
-                    value={customTime ? 'Other' : learner.extraTime}
-                    onChange={(e) => {
-                      setCustomTime(e.target.value === 'Other');
-                      patch({ extraTime: e.target.value === 'Other' ? '' : e.target.value });
-                    }}
-                  >
-                    {extraTimeOptions.map((o) => (
-                      <option key={o} value={o}>
-                        {o === 'Other' ? o : `${o}%`}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                {customTime && (
-                  <FieldInput
-                    field={{ key: 'extraTime', label: 'Custom extra time (%)' }}
-                    id={`${learner.id}-extraTime`}
-                    value={learner.extraTime}
-                    onChange={(value) => patch({ extraTime: value })}
-                    error={error('extraTime')}
+          <div id={`${learner.id}-arrangements`} hidden={!arrangementsOpen}>
+            <p className="field-note">
+              Record arrangements agreed with the Exams / Learning Support team. Selecting an option
+              does not approve it. Use learner notes for the required format, equipment or room
+              details. A smaller shared room (sometimes called a quiet room) is not individual
+              invigilation. Coloured overlays and coloured question papers are different
+              arrangements.
+            </p>
+            <div className="checkbox-grid">
+              {accessArrangements.map((a) => (
+                <label
+                  key={a.id}
+                  className={`check-option ${learner.arrangements.includes(a.id) ? 'checked' : ''}`}
+                >
+                  <input
+                    type="checkbox"
+                    checked={learner.arrangements.includes(a.id)}
+                    onChange={(e) =>
+                      patch({
+                        arrangements: e.target.checked
+                          ? [...learner.arrangements, a.id]
+                          : learner.arrangements.filter((id) => id !== a.id),
+                      })
+                    }
                   />
-                )}
-              </>
-            )}
-            {learner.arrangements.includes('other') && (
-              <FieldInput
-                field={{ key: 'otherArrangement', label: 'Other arrangement details' }}
-                id={`${learner.id}-otherArrangement`}
-                value={learner.otherArrangement}
-                onChange={(value) => patch({ otherArrangement: value })}
-                error={error('otherArrangement')}
-              />
-            )}
+                  <span>{a.label}</span>
+                </label>
+              ))}
+            </div>
+            <div className="form-grid conditional-fields">
+              {learner.arrangements.includes('extraTime') && (
+                <>
+                  <div className="field">
+                    <label htmlFor={`${learner.id}-extraTime-choice`}>Extra time percentage</label>
+                    <select
+                      id={`${learner.id}-extraTime-choice`}
+                      value={customTime ? 'Other' : learner.extraTime}
+                      onChange={(e) => {
+                        setCustomTime(e.target.value === 'Other');
+                        patch({ extraTime: e.target.value === 'Other' ? '' : e.target.value });
+                      }}
+                    >
+                      {extraTimeOptions.map((o) => (
+                        <option key={o} value={o}>
+                          {o === 'Other' ? o : `${o}%`}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  {customTime && (
+                    <FieldInput
+                      field={{ key: 'extraTime', label: 'Custom extra time (%)' }}
+                      id={`${learner.id}-extraTime`}
+                      value={learner.extraTime}
+                      onChange={(value) => patch({ extraTime: value })}
+                      error={error('extraTime')}
+                    />
+                  )}
+                </>
+              )}
+              {learner.arrangements.includes('other') && (
+                <FieldInput
+                  field={{ key: 'otherArrangement', label: 'Other arrangement details' }}
+                  id={`${learner.id}-otherArrangement`}
+                  value={learner.otherArrangement}
+                  onChange={(value) => patch({ otherArrangement: value })}
+                  error={error('otherArrangement')}
+                />
+              )}
+            </div>
           </div>
         </fieldset>
         <div className="resit-row">
